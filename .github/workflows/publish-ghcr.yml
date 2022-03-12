@@ -67,7 +67,7 @@ jobs:
           VERSION=`jq -r .version lerna.json`
           if [ ${{ github.event.inputs.image_tag_prefix }} ] ;  then
             if [ $github.ref_name == "main" ] ; then
-               npx lerna version --conventional-graduate --yes
+               npx lerna version --conventional-graduate --conventional-commits --yes
             else
                npx lerna version prerelease --yes --preid staging
             fi
