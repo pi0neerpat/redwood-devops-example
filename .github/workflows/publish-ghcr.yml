@@ -1,0 +1,100 @@
+# Adapted from https://github.com/users/jeliasson/packages/container/package/redwoodjs-app-api-main
+name: 'Github Publish Docker'
+on:
+  release:
+    types: [published]
+  # Allows triggering a deployment manually
+  workflow_dispatch:
+    inputs:
+      image_tag_prefix:
+        description: 'Image Tag Prefix (prod or staging)'
+        required: true
+        default: 'staging'
+env:
+  REDWOOD_API_URL: 'http://0.0.0.0:8911'
+  APP_DOMAIN: 'http://0.0.0.0:8910'
+
+  # Container Registry
+  CONTAINER_REGISTRY_HOSTNAME: ghcr.io
+  CONTAINER_REGISTRY_USERNAME: pi0neerpat
+  CONTAINER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  CONTAINER_REGISTRY_REPOSITORY: pi0neerpat
+  CONTAINER_REGISTRY_IMAGE_PREFIX: treasure-chess
+
+  # Repository
+  GIT_DEPLOY_REPOSITORY_NAME: pi0neerpat/treasure-chess
+  GIT_DEPLOY_REPOSITORY_AUTHOR_NAME: pi0neerpat
+  GIT_DEPLOY_REPOSITORY_AUTHOR_EMAIL: pi0neerpat@users.noreply.github.com
+  GIT_DEPLOY_REPOSITORY_AUTHOR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [api, web]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Get variables
+        id: get_variables
+        run: |
+          NODE_ENV=staging
+          BRANCH=staging
+          if [ ${{ github.event.inputs.image_tag_prefix }} ] ; then
+             NODE_ENV=${{ github.event.inputs.image_tag_prefix }}
+             BRANCH=${{ github.ref_name }}
+          else if ! grep -q "rc" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
+             NODE_ENV=prod
+             BRANCH=main
+          fi
+          echo "::set-output name=BRANCH::$BRANCH"
+          echo "::set-output name=NODE_ENV::$NODE_ENV"
+      - name: Checkout branch
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.get_variables.outputs.BRANCH }}
+      # Setup Docker using buildx-action
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v1
+      # Login to Docker Container Registry
+      - name: Docker login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY_HOSTNAME }}
+          username: ${{ env.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ env.CONTAINER_REGISTRY_PASSWORD }}
+      # Build Docker image with a :latest and :<git sha> tag
+      - name: Docker build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./${{ matrix.platform }}/Dockerfile
+          build-args: |
+            NODE_ENV=${{ steps.get_variables.outputs.NODE_ENV }}
+            REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
+            APP_DOMAIN=${{ env.APP_DOMAIN }}
+          tags: |
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:latest
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:${{ steps.get_release.outputs.tag_name }}
+      - name: Discord notification
+        if: ${{ matrix.platform }} == "web" # Limit one notification per release
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
+        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
+        with:
+          args: |
+            🚢 Shipped it 🚢
+
+            **${{ steps.get_release.outputs.tag_name }}**
+
+            ${{ steps.get_release.outputs.html_url }}

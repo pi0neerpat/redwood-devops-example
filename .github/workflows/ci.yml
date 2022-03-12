@@ -64,13 +64,13 @@ jobs:
         with:
           node-version: 12.x
           registry-url: https://registry.npmjs.org/
-      - name: Check version
-        id: check_version
+      - name: Update version
+        id: update_version
         run: |
           shortRev=$(git rev-parse --short ${{ github.sha }})
           preId=rc.${steps.sha.outputs.sha_short}
           if [ $github.ref_name == "main" ] ; then
-             yarn lerna version patch --yes
+             # yarn lerna version patch --yes
           else
              yarn lerna version prerelease --yes --no-git-tag-version --preid ${preId}
           fi
@@ -82,8 +82,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ steps.check_version.outputs.NEW_VERSION }}
-          release_name: ${{ steps.check_version.outputs.NEW_VERSION }}
+          tag_name: ${{ steps.update_version.outputs.NEW_VERSION }}
+          release_name: ${{ steps.update_version.outputs.NEW_VERSION }}
           body: |
             Changes in this Release
             ## Changed
@@ -91,10 +91,3 @@ jobs:
             ## Fixes
             ## Breaking
           draft: true
-      - name: Discord notification
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
-        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
-        with:
-          args: 🏭 Building image `${{ steps.version.outputs.version }}` 🏭

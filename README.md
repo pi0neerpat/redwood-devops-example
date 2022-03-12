@@ -17,3 +17,7 @@ Update your Secrets for Actions to include:
 # Features wanted
 
 - Add the release details to a Changelog file. See https://keepachangelog.com
+
+# TODO
+
+- [ ] Don't tag `latest` if release candidate
