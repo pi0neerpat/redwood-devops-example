@@ -9,7 +9,6 @@ on:
 jobs:
   runCI:
     name: Run CI
-    id: runCI
     runs-on: ubuntu-latest
     steps:
       # check out this repo (so that this workflow can use it)
