@@ -50,7 +50,7 @@ jobs:
           if [ ${{ github.event.inputs.image_tag_prefix }} ] ; then
              NODE_ENV=${{ github.event.inputs.image_tag_prefix }}
              BRANCH=${{ github.ref_name }}
-          else if ! grep -q "rc" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
+          elif ! grep -q "rc" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
              NODE_ENV=prod
              BRANCH=main
           fi

@@ -5,8 +5,10 @@ No project is complete without a proper release. The example here is for a Redwo
 # Usage
 
 1. Merge to `staging` or `main`. This will create a new release draft for you to complete.
-2. Publish the draft release to trigger a new build
+2. Publish the draft release, which triggers a new Docker publish
 3. When finished you'll get a Discord notification
+
+You can also manually trigger deployments using the workflow dispatch trigger.
 
 # Set up
 
