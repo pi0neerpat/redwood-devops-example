@@ -4,7 +4,7 @@ No project is complete without a proper release. The example here is for a Redwo
 
 # Usage
 
-1. Merge to `staging` or `master`, which will create a draft release
+1. Merge to `staging` or `main`, which will create a draft release
 2. Publish the draft release to trigger a new build
 3. When finished you'll get a Discord notification
 
@@ -12,7 +12,7 @@ No project is complete without a proper release. The example here is for a Redwo
 
 Update your Secrets for Actions to include:
 
-- `DISCORD_WEBHOOK_DEVOPS`
+- `DISCORD_WEBHOOK_DEVOPS` - Copy from your Discord channel settings.
 
 # Features wanted
 

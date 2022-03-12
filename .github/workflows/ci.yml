@@ -31,33 +31,31 @@ jobs:
       # install dependencies
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      # lint, check, run tests, and build
-      # - name: Run CI
-      #   uses: jtoar/redwoodjs-ci@v0.2.0
       - name: Lint
         run: yarn rw lint
         shell: bash
       - name: Check
         run: yarn rw check
         shell: bash
-      # TODO: Inject DATABASE_URL for testing
-      # - name: Run tests
-      #   run: yarn rw test
-      #   shell: bash
+      # TODO: Inject TEST_DATABASE_URL if you wish to run api testing
+      - name: Test
+        run: yarn rw test
+        shell: bash
       - name: Build packages
         run: yarn build-packages
         shell: bash
-      - name: Build
+      - name: Build api & web
         run: yarn rw build
         shell: bash
+        # TODO: throw error if size exceeds limit for vercel
       # - name: Check serverless size
       #   run: yarn zip-it-and-ship-it api/dist/functions/ zipped
       #   shell: bash
-      # TODO: throw error if size exceeds limit
   create-release-draft:
     name: Create Release Draft
     needs: runCI
-    if: github.ref_name == 'main' || github.ref_name == 'staging'
+    # Only create drafts on merge
+    if: github.event_name == 'push'
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -67,20 +65,23 @@ jobs:
           node-version: 12.x
           registry-url: https://registry.npmjs.org/
       - name: Get short sha
-        id: vars
+        id: sha
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-      # - name: Get version
-      #   id: version
-      #   run: echo "::set-output name=version::$(git rev-parse --short HEAD)"
+      - name: Version
+        id: version
+        run: |
+          shortRev=$(git rev-parse --short ${{ github.sha }})
+          preId=dev.${shortRev}
+          yarn lerna version prerelease --yes --no-git-tag-version --preid ${preId}
       - name: Create release draft
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref_name }}-${{ steps.vars.outputs.sha_short }}
+          tag_name: ${{ github.ref_name }}-${{ steps.sha.outputs.sha_short }}
           # tag_name: ${{ steps.version.outputs.version }}
-          release_name: ${{ github.ref_name }}-${{ steps.vars.outputs.sha_short }}
+          release_name: ${{ github.ref_name }}-${{ steps.sha.outputs.sha_short }}
           body: |
             Changes in this Release
             ## Changed
