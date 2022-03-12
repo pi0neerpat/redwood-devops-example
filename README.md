@@ -1,27 +1,19 @@
-# Redwood
+# About
 
-> **NOTICE:** RedwoodJS is very close to a stable version 1.0. In the last two years,
-> the project has matured significantly and is already used in production by a number
-> of startups. We intend to have a 1.0 release candidate before the end of 2021 and
-> to release a truly production-ready 1.0 in early 2022.
+No project is complete without a proper release. The example here is for a RedwoodJS project using Docker images for deployment, but you can replace the resulting action with anything (eg. trigger an external service, build something in /packages, etc.).
 
-## Getting Started
-- [Tutorial](https://redwoodjs.com/tutorial/welcome-to-redwood): getting started and complete overview guide.
-- [Docs](https://redwoodjs.com/docs/introduction): using the Redwood Router, handling assets and files, list of command-line tools, and more.
-- [Redwood Community](https://community.redwoodjs.com): get help, share tips and tricks, and collaborate on everything about RedwoodJS.
+# Usage
 
-### Setup
+1. Merge to `staging` or `master`, which will create a draft release
+2. Publish the draft release to trigger a new build
+3. When finished you'll get a Discord notification
 
-We use Yarn as our package manager. To get the dependencies installed, just do this in the root directory:
+# Set up
 
-```terminal
-yarn install
-```
+Update your Secrets for Actions to include:
 
-### Fire it up
+- `DISCORD_WEBHOOK_DEVOPS`
 
-```terminal
-yarn redwood dev
-```
+# Features wanted
 
-Your browser should open automatically to `http://localhost:8910` to see the web app. Lambda functions run on `http://localhost:8911` and are also proxied to `http://localhost:8910/.redwood/functions/*`.
+- Add the release details to a Changelog file. See https://keepachangelog.com
