@@ -88,3 +88,12 @@ jobs:
             ## Fixes
             ## Breaking
           draft: true
+      - name: Discord notify release draft
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
+        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
+        with:
+          args: |
+            🗒️ New Draft Release for `${{ steps.update_version.outputs.VERSION }}` 🗒️
+            ${{ steps.create_release.outputs.html_url }}
