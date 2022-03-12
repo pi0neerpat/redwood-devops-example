@@ -66,23 +66,21 @@ jobs:
       - name: Update version
         id: update_version
         run: |
-          shortRev=$(git rev-parse --short ${{ github.sha }})
-          preId=rc.${shortRev}
           if [ $github.ref_name == "main" ] ; then
-             npx lerna version patch --yes
+             npx lerna version --conventional-graduate --yes
           else
-             npx lerna version prerelease --yes --no-git-tag-version --preid ${preId}
+             npx lerna version prerelease --yes --preid staging
           fi
-          NEW_VERSION=`jq -r .version lerna.json`
-          echo "::set-output name=NEW_VERSION::$NEW_VERSION"
+          VERSION=`jq -r .version lerna.json`
+          echo "::set-output name=VERSION::$VERSION"
       - name: Create release draft
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ steps.update_version.outputs.NEW_VERSION }}
-          release_name: ${{ steps.update_version.outputs.NEW_VERSION }}
+          tag_name: v${{ steps.update_version.outputs.VERSION }}
+          release_name: v${{ steps.update_version.outputs.VERSION }}
           body: |
             Changes in this Release
             ## Changed

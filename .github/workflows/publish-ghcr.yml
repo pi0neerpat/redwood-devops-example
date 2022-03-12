@@ -37,8 +37,6 @@ jobs:
       matrix:
         platform: [api, web]
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
       - name: Get release
         id: get_release
         uses: bruceadams/get-release@v1.2.3
@@ -62,6 +60,19 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ steps.get_variables.outputs.BRANCH }}
+      - name: Get version
+        id: get_version
+        # If triggered by a workflow, we need to
+        run: |
+          VERSION=`jq -r .version lerna.json`
+          if [ ${{ github.event.inputs.image_tag_prefix }} ] ;  then
+            if [ $github.ref_name == "main" ] ; then
+               npx lerna version --conventional-graduate --yes
+            else
+               npx lerna version prerelease --yes --preid staging
+            fi
+          fi
+          echo "::set-output name=VERSION::$VERSION"
       # Setup Docker using buildx-action
       - name: Setup Docker
         uses: docker/setup-buildx-action@v1
@@ -73,6 +84,13 @@ jobs:
           username: ${{ env.CONTAINER_REGISTRY_USERNAME }}
           password: ${{ env.CONTAINER_REGISTRY_PASSWORD }}
       # Build Docker image with a :latest and :<git sha> tag
+      - name: Discord notify building
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
+        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
+        with:
+          args: 🏭 Building images for `${{ steps.get_variables.outputs.VERSION }}` 🏭
       - name: Docker build
         uses: docker/build-push-action@v2
         with:
@@ -85,8 +103,8 @@ jobs:
             APP_DOMAIN=${{ env.APP_DOMAIN }}
           tags: |
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:latest
-            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:${{ steps.get_release.outputs.tag_name }}
-      - name: Discord notification
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:${{ steps.get_variables.outputs.VERSION }}
+      - name: Discord notify complete
         if: ${{ matrix.platform }} == "web" # Limit one notification per release
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
@@ -95,6 +113,6 @@ jobs:
           args: |
             🚢 Shipped it 🚢
 
-            **${{ steps.get_release.outputs.tag_name }}**
+            **${{ steps.get_variables.outputs.VERSION }}**
 
             ${{ steps.get_release.outputs.html_url }}
