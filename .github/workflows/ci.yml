@@ -69,9 +69,9 @@ jobs:
           shortRev=$(git rev-parse --short ${{ github.sha }})
           preId=rc.${{ steps.sha.outputs.sha_short }}
           if [ $github.ref_name == "main" ] ; then
-             yarn lerna version patch --yes
+             npx lerna version patch --yes
           else
-             yarn lerna version prerelease --yes --no-git-tag-version --preid ${preId}
+             npx lerna version prerelease --yes --no-git-tag-version --preid ${preId}
           fi
           NEW_VERSION=`jq -r .version package.json`
           echo "::set-output name=NEW_VERSION::$NEW_VERSION"

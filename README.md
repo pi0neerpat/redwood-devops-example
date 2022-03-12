@@ -4,7 +4,7 @@ No project is complete without a proper release. The example here is for a Redwo
 
 # Usage
 
-1. Merge to `staging` or `main`, which will create a draft release
+1. Merge to `staging` or `main`. This will create a new release draft for you to complete.
 2. Publish the draft release to trigger a new build
 3. When finished you'll get a Discord notification
 
