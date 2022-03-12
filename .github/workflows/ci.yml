@@ -65,6 +65,8 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - name: Update version
         id: update_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ $github.ref_name == "main" ] ; then
              npx lerna version --conventional-graduate --yes
