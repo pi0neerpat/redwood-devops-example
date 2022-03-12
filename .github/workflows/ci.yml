@@ -69,7 +69,7 @@ jobs:
           shortRev=$(git rev-parse --short ${{ github.sha }})
           preId=rc.${{ steps.sha.outputs.sha_short }}
           if [ $github.ref_name == "main" ] ; then
-             # yarn lerna version patch --yes
+             yarn lerna version patch --yes
           else
              yarn lerna version prerelease --yes --no-git-tag-version --preid ${preId}
           fi
