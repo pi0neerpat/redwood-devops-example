@@ -22,31 +22,31 @@ jobs:
           node-version: '14'
       # cache dependencies and build outputs to improve workflow execution time
       # https://github.com/actions/cache
-      - name: Cache "node_modules"
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: node_modules_${{ hashFiles('**/yarn.lock') }}
-      # install dependencies
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-      - name: Lint
-        run: yarn rw lint
-        shell: bash
-      - name: Check
-        run: yarn rw check
-        shell: bash
-      # TODO: Inject TEST_DATABASE_URL if you wish to run api testing
-      - name: Test
-        run: yarn rw test
-        shell: bash
-      - name: Build packages
-        run: yarn build-packages
-        shell: bash
-      - name: Build api & web
-        run: yarn rw build
-        shell: bash
-        # TODO: throw error if size exceeds limit for vercel
+      # - name: Cache "node_modules"
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: '**/node_modules'
+      #     key: node_modules_${{ hashFiles('**/yarn.lock') }}
+      # # install dependencies
+      # - name: Install dependencies
+      #   run: yarn install --frozen-lockfile
+      # - name: Lint
+      #   run: yarn rw lint
+      #   shell: bash
+      # - name: Check
+      #   run: yarn rw check
+      #   shell: bash
+      # # TODO: Inject TEST_DATABASE_URL if you wish to run api testing
+      # - name: Test
+      #   run: yarn rw test
+      #   shell: bash
+      # - name: Build packages
+      #   run: yarn build-packages
+      #   shell: bash
+      # - name: Build api & web
+      #   run: yarn rw build
+      #   shell: bash
+      # TODO: throw error if size exceeds limit for vercel
       # - name: Check serverless size
       #   run: yarn zip-it-and-ship-it api/dist/functions/ zipped
       #   shell: bash
