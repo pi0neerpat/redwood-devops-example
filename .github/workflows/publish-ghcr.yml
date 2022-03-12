@@ -16,16 +16,8 @@ env:
 
   # Container Registry
   CONTAINER_REGISTRY_HOSTNAME: ghcr.io
-  CONTAINER_REGISTRY_USERNAME: pi0neerpat
+  CONTAINER_REGISTRY_USERNAME: ${{ github.actor }}
   CONTAINER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-  CONTAINER_REGISTRY_REPOSITORY: pi0neerpat
-  CONTAINER_REGISTRY_IMAGE_PREFIX: treasure-chess
-
-  # Repository
-  GIT_DEPLOY_REPOSITORY_NAME: pi0neerpat/treasure-chess
-  GIT_DEPLOY_REPOSITORY_AUTHOR_NAME: pi0neerpat
-  GIT_DEPLOY_REPOSITORY_AUTHOR_EMAIL: pi0neerpat@users.noreply.github.com
-  GIT_DEPLOY_REPOSITORY_AUTHOR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
@@ -90,7 +82,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
         with:
-          args: 🏭 Building images for `v${{ steps.get_variables.outputs.VERSION }}` 🏭
+          args: 🏭 Build in progress... `v${{ steps.get_variables.outputs.VERSION }}` 🏭
       - name: Docker build
         uses: docker/build-push-action@v2
         with:
@@ -102,8 +94,8 @@ jobs:
             REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
             APP_DOMAIN=${{ env.APP_DOMAIN }}
           tags: |
-            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:latest
-            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ env.CONTAINER_REGISTRY_REPOSITORY }}/${{ env.CONTAINER_REGISTRY_IMAGE_PREFIX }}-${{ matrix.platform }}:${{ steps.get_variables.outputs.VERSION }}
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.action_repository }}-${{ matrix.platform }}:latest
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.action_repository }}-${{ matrix.platform }}:${{ steps.get_variables.outputs.VERSION }}
       - name: Discord notify complete
         if: ${{ matrix.platform }} == "web" # Limit one notification per release
         env:
@@ -111,7 +103,7 @@ jobs:
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
         with:
           args: |
-            🚢 Shipped it 🚢
+            🚢 Shipped 🚢
 
             **v${{ steps.get_variables.outputs.VERSION }}**
 
