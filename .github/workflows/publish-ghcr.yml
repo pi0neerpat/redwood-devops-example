@@ -23,6 +23,11 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-20.04
+    outputs:
+      RELEASE_HTML_URL: ${{ steps.get_release.outputs.html_url }}
+      BRANCH: ${{ steps.get_variables.outputs.VERSION }}
+      NODE_ENV: ${{ steps.get_variables.outputs.NODE_ENV }}
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
     steps:
       - name: Get release
         id: get_release
@@ -80,7 +85,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v2
         with:
-          ref: ${{ job.setup.steps.get_variables.outputs.BRANCH }}
+          ref: ${{ jobs.setup.outputs.BRANCH }}
       - name: Setup Docker
         uses: docker/setup-buildx-action@v1
       - name: Docker login
@@ -96,12 +101,12 @@ jobs:
           context: .
           file: ./${{ matrix.platform }}/Dockerfile
           build-args: |
-            NODE_ENV=${{ job.setup.steps.get_variables.outputs.NODE_ENV }}
+            NODE_ENV=${{ jobs.setup.outputs.NODE_ENV }}
             REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
             APP_DOMAIN=${{ env.APP_DOMAIN }}
           tags: |
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
-            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ job.setup.steps.get_version.outputs.VERSION }}
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ jobs.setup.outputs.VERSION }}
       - name: Discord notify complete
         if: ${{ matrix.platform }} == "api" # Limit to only one notification per release
         env:
@@ -111,6 +116,6 @@ jobs:
           args: |
             🚢 Shipped 🚢
 
-            **${{ job.setup.steps.get_version.outputs.VERSION }}**
+            **${{ jobs.setup.outputs.VERSION }}**
 
-            ${{ job.setup.steps.get_release.outputs.html_url }}
+            ${{ jobs.setup.outputs.RELEASE_HTML_URL }}
