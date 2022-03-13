@@ -5,10 +5,10 @@ FROM node:14 as base
 WORKDIR /app
 
 ARG NODE_ENV
-ARG RUNTIME_ENV
+ARG VERSION
 
 ENV NODE_ENV=$NODE_ENV
-ENV RUNTIME_ENV=$RUNTIME_ENV
+ENV VERSION=$VERSION
 
 COPY package.json package.json
 COPY yarn.lock yarn.lock
