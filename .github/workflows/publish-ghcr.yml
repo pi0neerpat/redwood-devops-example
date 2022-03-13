@@ -44,7 +44,8 @@ jobs:
              BRANCH=${{ github.ref_name }}
           elif ! grep -q "rc" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
              NODE_ENV=prod
-             BRANCH=main
+             if [ !${{steps.get_release.outputs.prerelease}} ] ; BRANCH=main
+             fi
           fi
           echo "::set-output name=BRANCH::$BRANCH"
           echo "::set-output name=NODE_ENV::$NODE_ENV"
