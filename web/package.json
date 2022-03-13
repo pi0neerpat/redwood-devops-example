@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.4",
+  "version": "0.1.6-staging.0",
   "private": true,
   "browserslist": {
     "development": [

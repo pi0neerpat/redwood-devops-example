@@ -1,6 +1,6 @@
 {
   "name": "example-package",
-  "version": "0.1.4",
+  "version": "0.1.6-staging.0",
   "description": "",
   "main": "dist/index.js",
   "module": "src/index.js",
