@@ -18,6 +18,8 @@ Add to your existing Redwood project:
 2. `yarn add lerna -W -D && yarn lerna init`
 3. Use the template `publish-ghcr.yml` to create your own deployment action.
 
+If you plan on using the Docker image builds, copy over `/web/Dockerfile`, `/api/Dockerfile`, and `/web/config/nginx/default.conf`
+
 # TODO
 
 - [ ] Don't tag `latest` if release candidate

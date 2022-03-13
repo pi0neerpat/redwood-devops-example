@@ -19,6 +19,7 @@ COPY graphql.config.js graphql.config.js
 COPY packages packages
 COPY api/package.json api/package.json
 COPY web/package.json web/package.json
+COPY lerna.json lerna.json
 
 RUN yarn install --frozen-lockfile
 
