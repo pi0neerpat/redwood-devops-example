@@ -22,13 +22,41 @@ You can also manually trigger deployments using the workflow dispatch trigger.
 
 ## Setup
 
-Add to your existing Redwood project:
+Follow these steps to add this to an existing project:
 
 1. Update your repo's secrets with `DISCORD_WEBHOOK_DEVOPS` from your Discord channel settings.
 2. `yarn add lerna -W -D && yarn lerna init`
 3. Use the template `publish-ghcr.yml` to create your own deployment action.
 
-If you plan on using the Docker image builds, copy over `/web/Dockerfile`, `/api/Dockerfile`, and `/web/config/nginx/default.conf`
+If you plan building Docker image, as in the example here, you'll need to copy over `/web/Dockerfile`, `/api/Dockerfile`, and `/web/config/nginx/default.conf`.
+
+NOTE: If you have branch protection on, you will need to use a Github Personal Access Token in order for lerna to push commits. See [here](https://github.com/lerna/lerna/issues/1957#issuecomment-997377227).
+
+<details><summary>See changes for protected branches</summary>
+
+```yml
+create-release-draft:
+  name: Create Release Draft
+  needs: runCI
+  if: github.event_name == 'push'
+  runs-on: ubuntu-20.04
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PAT_GITHUB }}
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+        registry-url: https://registry.npmjs.org/
+    - name: Update version
+      id: update_version
+      env:
+        GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+```
+
+</details>
 
 ## Author
 

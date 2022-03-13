@@ -68,7 +68,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
         with:
-          args: 🏭 Build in progress... `${{ steps.get_version.outputs.VERSION }}`
+          args: 🏭 Building... `${{ steps.get_version.outputs.VERSION }}`
   build:
     name: Build and Deploy
     runs-on: ubuntu-20.04
