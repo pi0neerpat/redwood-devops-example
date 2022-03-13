@@ -1,8 +1,4 @@
 {
-  "packages": [
-    "packages/*",
-    "web",
-    "api"
-  ],
-  "version": "0.1.4"
+  "packages": ["packages/*", "web", "api"],
+  "version": "0.1.5"
 }
