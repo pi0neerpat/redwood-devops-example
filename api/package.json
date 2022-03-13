@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "0.1.3-staging.5",
+  "version": "0.1.3-staging.6",
   "private": true,
   "dependencies": {
     "@redwoodjs/api": "0.49.1",
