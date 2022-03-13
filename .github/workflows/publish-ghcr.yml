@@ -66,7 +66,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
         with:
-          args: 🏭 Build in progress... `v${{ steps.get_version.outputs.VERSION }}` 🏭
+          args: 🏭 Build in progress... `${{ steps.get_version.outputs.VERSION }}` 🏭
   build:
     name: Build and Deploy
     runs-on: ubuntu-20.04
@@ -101,7 +101,7 @@ jobs:
             APP_DOMAIN=${{ env.APP_DOMAIN }}
           tags: |
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
-            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:v${{ job.setup.steps.get_version.outputs.VERSION }}
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ job.setup.steps.get_version.outputs.VERSION }}
       - name: Discord notify complete
         if: ${{ matrix.platform }} == "api" # Limit to only one notification per release
         env:
@@ -111,6 +111,6 @@ jobs:
           args: |
             🚢 Shipped 🚢
 
-            **v${{ job.setup.steps.get_version.outputs.VERSION }}**
+            **${{ job.setup.steps.get_version.outputs.VERSION }}**
 
             ${{ job.setup.steps.get_release.outputs.html_url }}
