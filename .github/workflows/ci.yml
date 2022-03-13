@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  runCI:
+    name: Run CI
+    runs-on: ubuntu-latest
+    steps:
+      # check out this repo (so that this workflow can use it)
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v2
+      # set up a node environment
+      # https://github.com/actions/setup-node
+      - name: Setup Node.js v14
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      # cache dependencies and build outputs to improve workflow execution time
+      # https://github.com/actions/cache
+      # - name: Cache "node_modules"
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: '**/node_modules'
+      #     key: node_modules_${{ hashFiles('**/yarn.lock') }}
+      # # install dependencies
+      # - name: Install dependencies
+      #   run: yarn install --frozen-lockfile
+      # - name: Lint
+      #   run: yarn rw lint
+      #   shell: bash
+      # - name: Check
+      #   run: yarn rw check
+      #   shell: bash
+      # # TODO: Inject TEST_DATABASE_URL if you wish to run api testing
+      # - name: Test
+      #   run: yarn rw test
+      #   shell: bash
+      # - name: Build packages
+      #   run: yarn build-packages
+      #   shell: bash
+      # - name: Build api & web
+      #   run: yarn rw build
+      #   shell: bash
+      # TODO: throw error if size exceeds limit for vercel
+      # - name: Check serverless size
+      #   run: yarn zip-it-and-ship-it api/dist/functions/ zipped
+      #   shell: bash
+  create-release-draft:
+    name: Create Release Draft
+    needs: runCI
+    # Only create drafts on merge
+    if: github.event_name == 'push'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+          registry-url: https://registry.npmjs.org/
+      - name: Update version
+        id: update_version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor}}@users.noreply.github.com"
+
+          if [ ${{ github.ref_name }} == "main" ] ; then
+             npx lerna version --conventional-graduate --conventional-commits --yes
+          else
+             npx lerna version prerelease --yes --preid staging
+          fi
+          VERSION=`jq -r .version lerna.json`
+          echo "::set-output name=VERSION::$VERSION"
+      - name: Create release draft
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: v${{ steps.update_version.outputs.VERSION }}
+          release_name: v${{ steps.update_version.outputs.VERSION }}
+          body: |
+            Changes in this Release
+            ## Changed
+            ## Added
+            ## Fixes
+            ## Breaking
+          draft: true
+      - name: Discord notify release draft
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
+        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
+        with:
+          args: |
+            🗒️ New Draft Release for `v${{ steps.update_version.outputs.VERSION }}` 🗒️
+
+            ${{ steps.create_release.outputs.html_url }}
