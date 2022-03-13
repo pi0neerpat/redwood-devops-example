@@ -12,13 +12,11 @@ You can also manually trigger deployments using the workflow dispatch trigger.
 
 # Set up
 
-Update your Secrets for Actions to include:
+Add to your existing Redwood project:
 
-- `DISCORD_WEBHOOK_DEVOPS` - Copy from your Discord channel settings.
-
-# Features wanted
-
-- Add the release details to a Changelog file. See https://keepachangelog.com
+1. Update your repo's secrets with `DISCORD_WEBHOOK_DEVOPS` from your Discord channel settings.
+2. `yarn add lerna -W -D && yarn lerna init`
+3. Use the template `publish-ghcr.yml` to create your own deployment action.
 
 # TODO
 

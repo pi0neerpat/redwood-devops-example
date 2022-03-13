@@ -68,16 +68,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          IS_PRERELEASE=true
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor}}@users.noreply.github.com"
 
           if [ ${{ github.ref_name }} == "main" ] ; then
              npx lerna version --conventional-graduate --conventional-commits --yes
+             IS_PRERELEASE=false
           else
              npx lerna version prerelease --yes --preid staging
           fi
           VERSION=`jq -r .version lerna.json`
           echo "::set-output name=VERSION::$VERSION"
+          echo "::set-output name=IS_PRERELEASE::$IS_PRERELEASE"
       - name: Create release draft
         id: create_release
         uses: actions/create-release@v1
@@ -93,6 +96,7 @@ jobs:
             ## Fixes
             ## Breaking
           draft: true
+          prerelease: ${{ steps.update_version.outputs.IS_PRERELEASE }}
       - name: Discord notify release draft
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
