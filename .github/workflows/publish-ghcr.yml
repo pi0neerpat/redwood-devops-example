@@ -1,4 +1,3 @@
-# Adapted from https://github.com/users/jeliasson/packages/container/package/redwoodjs-app-api-main
 name: 'Github Publish Docker'
 on:
   release:
@@ -42,7 +41,7 @@ jobs:
           if [ ${{ github.event.inputs.image_tag_prefix }} ] ; then
              NODE_ENV=${{ github.event.inputs.image_tag_prefix }}
              BRANCH=${{ github.ref_name }}
-          elif ! grep -q "rc" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
+          elif ! grep -q "staging" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
              NODE_ENV=prod
              BRANCH=main
           fi
@@ -54,8 +53,6 @@ jobs:
           ref: ${{ steps.get_variables.outputs.BRANCH }}
       - name: Get version
         id: get_version
-        # If triggered by a workflow, we need to
-        # todo: should this commit to git?
         run: |
           if [ ${{ github.event.inputs.image_tag_prefix }} ] ;  then
             if [ $github.ref_name == "main" ] ; then
@@ -107,8 +104,14 @@ jobs:
           tags: |
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ needs.setup.outputs.VERSION }}
+  notify:
+    name: Notify
+    runs-on: ubuntu-20.04
+    needs:
+      - build
+      - setup
+    steps:
       - name: Discord notify complete
-        if: ${{ matrix.platform }} == "api" # Limit to only one notification per release. Api usually takes longer.
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
