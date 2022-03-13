@@ -108,14 +108,10 @@ jobs:
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ needs.setup.outputs.VERSION }}
       - name: Discord notify complete
-        if: ${{ matrix.platform }} == "api" # Limit to only one notification per release
+        if: ${{ matrix.platform }} == "api" # Limit to only one notification per release. Api usually takes longer.
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
         with:
           args: |
-            🚢 Shipped!
-
-            **${{ needs.setup.outputs.VERSION }}**
-
-            ${{ needs.setup.outputs.RELEASE_HTML_URL }}
+            🚢 Shipped! ${{ needs.setup.outputs.RELEASE_HTML_URL }}
