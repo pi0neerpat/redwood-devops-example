@@ -20,6 +20,6 @@ export const hasRole = ({ roles }) => {
 
 // Roles are passed in by the requireAuth directive if you have auth setup
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const requireAuth = ({ roles }) => {
+export const requireAuth = ({ _roles }) => {
   return isAuthenticated()
 }
