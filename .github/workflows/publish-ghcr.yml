@@ -85,7 +85,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v2
         with:
-          ref: ${{ jobs.setup.outputs.BRANCH }}
+          ref: ${{ needs.setup.outputs.BRANCH }}
       - name: Setup Docker
         uses: docker/setup-buildx-action@v1
       - name: Docker login
@@ -101,12 +101,12 @@ jobs:
           context: .
           file: ./${{ matrix.platform }}/Dockerfile
           build-args: |
-            NODE_ENV=${{ jobs.setup.outputs.NODE_ENV }}
+            NODE_ENV=${{ needs.setup.outputs.NODE_ENV }}
             REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
             APP_DOMAIN=${{ env.APP_DOMAIN }}
           tags: |
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
-            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ jobs.setup.outputs.VERSION }}
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ needs.setup.outputs.VERSION }}
       - name: Discord notify complete
         if: ${{ matrix.platform }} == "api" # Limit to only one notification per release
         env:
@@ -116,6 +116,6 @@ jobs:
           args: |
             🚢 Shipped 🚢
 
-            **${{ jobs.setup.outputs.VERSION }}**
+            **${{ needs.setup.outputs.VERSION }}**
 
-            ${{ jobs.setup.outputs.RELEASE_HTML_URL }}
+            ${{ needs.setup.outputs.RELEASE_HTML_URL }}
