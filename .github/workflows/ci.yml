@@ -10,45 +10,66 @@ jobs:
   runCI:
     name: Run CI
     runs-on: ubuntu-latest
+    outputs:
+      SKIP_RELEASE: ${{ steps.skip_release.outputs.SKIP_RELEASE }}
     steps:
       - uses: actions/checkout@v2
-      # - name: Setup Node.js v14
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: '14'
-      # # cache dependencies and build outputs to improve workflow execution time
-      # - name: Cache "node_modules"
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: '**/node_modules'
-      #     key: node_modules_${{ hashFiles('**/yarn.lock') }}
-      # - name: Install dependencies
-      #   run: yarn install --frozen-lockfile
-      # - name: Lint
-      #   run: yarn rw lint
-      #   shell: bash
-      # - name: Check
-      #   run: yarn rw check
-      #   shell: bash
-      # # TODO: Inject TEST_DATABASE_URL if you wish to run api testing
+      - name: Show context
+        run: |
+          echo github.event_name: ${{ github.event_name }}
+          echo github.sha: ${{ github.sha }}
+          echo github.repository: ${{ github.repository }}
+          echo github.ref: ${{ github.ref }}
+          echo github.event.head_commit.message: ${{ github.event.head_commit.message }}
+      - name: Setup Node.js v14
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      # cache dependencies and build outputs to improve workflow execution time
+      - name: Cache "node_modules"
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: node_modules_${{ hashFiles('**/yarn.lock') }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        run: yarn rw lint
+        shell: bash
+      - name: Check
+        run: yarn rw check
+        shell: bash
+      # TODO: Needs env TEST_DATABASE_URL if you wish to run api testing
       # - name: Test
       #   run: yarn rw test
       #   shell: bash
-      # - name: Build packages
-      #   run: yarn build-packages
-      #   shell: bash
-      # - name: Build api & web
-      #   run: yarn rw build
-      #   shell: bash
+      - name: Build packages
+        run: yarn build-packages
+        shell: bash
+      - name: Build api & web
+        run: yarn rw build
+        shell: bash
       # TODO: throw error if size exceeds limit for vercel
       # - name: Check serverless size
       #   run: yarn zip-it-and-ship-it api/dist/functions/ zipped
       #   shell: bash
+      - name: Skip release
+        id: skip_release
+        run: |
+          SKIP_RELEASE=0
+          if grep -q '^v[0-9]' <<< "${{ github.event.head_commit.message }}" ; then
+            SKIP_RELEASE=1
+          elif github.event_name == 'pull_request' ; then
+            SKIP_RELEASE=1
+          elif ! grep -q 'staging\|main' <<< "${{ github.ref_name }}" ; then
+            SKIP_RELEASE=1
+          fi
+          echo SKIP_RELEASE: $SKIP_RELEASE
+          echo "::set-output name=SKIP_RELEASE::$SKIP_RELEASE"
   create-release-draft:
     name: Create Release Draft
     needs: runCI
-    # Only create drafts on merge. Prevent running for version bump
-    if: github.event_name == 'push' && ! grep -q '^v[0-9]' <<< "${{ github.event.head_commit.message }}"
+    if: needs.runCI.outputs.SKIP_RELEASE == 0
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2

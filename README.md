@@ -34,11 +34,13 @@ NOTE: If you have branch protection on, you will need to use a Github Personal A
 
 <details><summary>See changes for protected branches</summary>
 
+In `ci.yml` you'll need to use a PAT. Also a check is added to skip creating a release when lerna commits the new version.
+
 ```yml
 create-release-draft:
   name: Create Release Draft
   needs: runCI
-  if: github.event_name == 'push'
+  if: needs.runCI.outputs.SKIP_RELEASE == 0
   runs-on: ubuntu-20.04
   steps:
     - name: Checkout
@@ -54,9 +56,14 @@ create-release-draft:
       id: update_version
       env:
         GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+      run: |
 ```
 
 </details>
+
+## TODO
+
+- Update test to use Github service container for test database https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
 
 ## Author
 

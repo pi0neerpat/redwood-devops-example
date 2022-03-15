@@ -28,6 +28,14 @@ jobs:
       NODE_ENV: ${{ steps.get_variables.outputs.NODE_ENV }}
       VERSION: ${{ steps.get_version.outputs.VERSION }}
     steps:
+      - name: Show context
+        run: |
+          echo github.event_name: ${{ github.event_name }}
+          echo github.sha: ${{ github.sha }}
+          echo github.repository: ${{ github.repository }}
+          echo github.ref: ${{ github.ref }}
+          echo github.head_ref: ${{ github.head_ref }}
+          echo github.event.inputs.image_tag_prefix: ${{ github.event.inputs.image_tag_prefix }}
       - name: Get release
         id: get_release
         uses: bruceadams/get-release@v1.2.3
@@ -37,14 +45,15 @@ jobs:
         id: get_variables
         run: |
           NODE_ENV=staging
-          BRANCH=staging
+          BRANCH=${{ steps.get_release.outputs.tag_name }}
           if [ ${{ github.event.inputs.image_tag_prefix }} ] ; then
              NODE_ENV=${{ github.event.inputs.image_tag_prefix }}
              BRANCH=${{ github.ref_name }}
           elif ! grep -q "staging" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
              NODE_ENV=prod
-             BRANCH=main
           fi
+          echo BRANCH: $BRANCH
+          echo NODE_ENV: $NODE_ENV
           echo "::set-output name=BRANCH::$BRANCH"
           echo "::set-output name=NODE_ENV::$NODE_ENV"
       - name: Checkout branch
@@ -70,7 +79,7 @@ jobs:
         with:
           args: 🏭 Building... `${{ steps.get_version.outputs.VERSION }}`
   build:
-    name: Build and Deploy
+    name: Build
     runs-on: ubuntu-20.04
     needs: setup
     timeout-minutes: 10
@@ -101,7 +110,7 @@ jobs:
             NODE_ENV=${{ needs.setup.outputs.NODE_ENV }}
             REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
             APP_DOMAIN=${{ env.APP_DOMAIN }}
-            VERSION=${{ steps.get_version.outputs.VERSION }}
+            VERSION=${{ needs.setup.outputs.VERSION }}
           tags: |
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
             ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ needs.setup.outputs.VERSION }}
@@ -118,4 +127,4 @@ jobs:
         uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
         with:
           args: |
-            🚢 Shipped! ${{ needs.setup.outputs.RELEASE_HTML_URL }}
+            🚢 Shipped! `${{ needs.setup.outputs.VERSION }}` ${{ needs.setup.outputs.RELEASE_HTML_URL }}
