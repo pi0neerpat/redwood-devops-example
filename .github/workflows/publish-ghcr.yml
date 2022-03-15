@@ -71,6 +71,7 @@ jobs:
             fi
           fi
           VERSION=`jq -r .version lerna.json`
+          echo VERSION: v$VERSION
           echo "::set-output name=VERSION::v$VERSION"
       - name: Discord notify building
         env:
