@@ -28,7 +28,7 @@ Follow these steps to add this to an existing project:
 
 1. Update your repo's secrets with `DISCORD_WEBHOOK_DEVOPS` from your Discord channel settings.
 2. `yarn add lerna -W -D && yarn lerna init`
-3. Use the template `publish-ghcr.yml` to create your own deployment action.
+3. Copy `ci.yml` and `publish-ghcr.yml` to your repo, and update as needed.
 
 If you plan building Docker image, as in the example here, you'll need to copy over `/web/Dockerfile`, `/api/Dockerfile`, and `/web/config/nginx/default.conf`.
 
