@@ -12,6 +12,8 @@
 
 No project is complete without a proper release. The example here is for a RedwoodJS project using Docker images for deployment, but you can replace the resulting action with anything (eg. trigger an external service, build something in /packages, etc.).
 
+![image](https://user-images.githubusercontent.com/35622595/158308437-70ac8fd9-1986-48d9-afe3-65da3b3bd03e.png)
+
 ## Usage
 
 1. Merge to `staging` or `main`. This will create a new release draft for you to complete.
@@ -26,7 +28,7 @@ Follow these steps to add this to an existing project:
 
 1. Update your repo's secrets with `DISCORD_WEBHOOK_DEVOPS` from your Discord channel settings.
 2. `yarn add lerna -W -D && yarn lerna init`
-3. Use the template `publish-ghcr.yml` to create your own deployment action.
+3. Copy `ci.yml` and `publish-ghcr.yml` to your repo, and update as needed.
 
 If you plan building Docker image, as in the example here, you'll need to copy over `/web/Dockerfile`, `/api/Dockerfile`, and `/web/config/nginx/default.conf`.
 
