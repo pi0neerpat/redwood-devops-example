@@ -38,6 +38,7 @@ jobs:
           echo github.event.inputs.image_tag_prefix: ${{ github.event.inputs.image_tag_prefix }}
       - name: Get release
         id: get_release
+        continue-on-error: true
         uses: bruceadams/get-release@v1.2.3
         env:
           GITHUB_TOKEN: ${{ github.token }}
