@@ -20,7 +20,6 @@ jobs:
           echo github.sha: ${{ github.sha }}
           echo github.repository: ${{ github.repository }}
           echo github.ref: ${{ github.ref }}
-          echo github.event.head_commit.message: ${{ github.event.head_commit.message }}
       - name: Setup Node.js v14
         uses: actions/setup-node@v2
         with:
@@ -93,8 +92,8 @@ jobs:
           else
              npx lerna version prerelease --yes --preid staging
           fi
-          VERSION=`jq -r .version lerna.json`
-          echo "::set-output name=VERSION::v$VERSION"
+          VERSION=v$(jq -r .version lerna.json)
+          echo "::set-output name=VERSION::$VERSION"
           echo "::set-output name=IS_PRERELEASE::$IS_PRERELEASE"
       - name: Create release draft
         id: create_release
