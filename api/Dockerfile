@@ -1,6 +1,6 @@
 # ==
 # Base
-FROM node:14 as base
+FROM node:14-alpine as base
 
 WORKDIR /app
 
@@ -31,22 +31,31 @@ RUN yarn build-packages && yarn rw build api
 
 # ==
 # Serve
-FROM node:14 as serve
+FROM node:14-alpine as serve
 
 WORKDIR /app
 
-COPY --from=build /app/api/package.json .
-# Only install necessary dependencies
-RUN yarn install --production --frozen-lockfile && \
-  yarn global add @redwoodjs/api-server @redwoodjs/internal lerna
+COPY --from=build /app/lerna.json .
+COPY --from=build /app/package.json .
+COPY --from=build /app/api/package.json /app/api/package.json
+COPY --from=build /app/yarn.lock /app/yarn.lock
+COPY --from=build /app/packages /app/packages
 
-COPY serve-api.sh .
+# Only install necessary dependencies.
+# Uses Lerna for linking local packages, and Prisma for migrations
+RUN yarn global add @redwoodjs/api-server @redwoodjs/internal lerna && \
+      yarn install --production --frozen-lockfile
 
 COPY --from=build /app/api/dist /app/api/dist
 COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
-COPY --from=build /app/api/db /app/api/db
-COPY --from=build /app/packages /app/packages
-COPY --from=build /app/redwood.toml /app/redwood.toml
+
+COPY api/db /app/api/db
+COPY redwood.toml .
+COPY serve-api.sh .
+
+# Helpful utilities for exploring your container
+RUN ["apt-get", "update"]
+RUN ["apt", "install", "-y", "nano", "ncdu"]
 
 # Expose RedwoodJS api port
 EXPOSE 8911
