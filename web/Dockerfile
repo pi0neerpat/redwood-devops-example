@@ -5,15 +5,15 @@
 FROM node:14 as builder
 
 # Node
-ARG NODE_ENV
+ARG ENVIRONMENT
+ARG VERSION
 ARG REDWOOD_API_URL
 ARG APP_DOMAIN
-ARG VERSION
 
-ENV NODE_ENV=$NODE_ENV
+ENV ENVIRONMENT=$ENVIRONMENT
+ENV VERSION=$VERSION
 ENV REDWOOD_API_URL=$REDWOOD_API_URL
 ENV APP_DOMAIN=$APP_DOMAIN
-ENV VERSION=$VERSION
 
 # Set workdir
 WORKDIR /app
@@ -35,9 +35,6 @@ RUN yarn build-packages
 
 # Build
 RUN yarn rw build web
-
-# Clean up
-RUN rm -rf ./web/src
 
 ###########################################################################################
 # Runner: Nginx
