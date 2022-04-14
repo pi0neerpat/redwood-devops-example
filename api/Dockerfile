@@ -36,10 +36,11 @@ FROM node:14 as serve
 WORKDIR /app
 
 COPY --from=build /app/api/package.json .
-RUN yarn install --production && \
-  yarn global add @redwoodjs/api-server @redwoodjs/internal
+# Only install necessary dependencies
+RUN yarn install --production --frozen-lockfile && \
+  yarn global add @redwoodjs/api-server @redwoodjs/internal lerna
 
-COPY serve-api.sh serve-api.sh
+COPY serve-api.sh .
 
 COPY --from=build /app/api/dist /app/api/dist
 COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
@@ -51,4 +52,4 @@ COPY --from=build /app/redwood.toml /app/redwood.toml
 EXPOSE 8911
 
 # Entrypoint to @redwoodjs/api-server binary
-ENTRYPOINT ["rw-server", "api"]
+ENTRYPOINT ["./serve-api.sh"]

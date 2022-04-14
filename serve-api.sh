@@ -1,3 +1,3 @@
 #!/bin/bash -ve
-yarn rw prisma migrate deploy
-yarn rw serve api
+prisma migrate deploy --schema ./api/db/schema.prisma
+rw-server api
