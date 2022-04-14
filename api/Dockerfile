@@ -1,22 +1,22 @@
 # ==
 # Base
-FROM node:14-alpine as base
+FROM node:14 as base
 
 WORKDIR /app
 
 ARG ENVIRONMENT
 ENV ENVIRONMENT=$ENVIRONMENT
 
-COPY package.json package.json
-COPY yarn.lock yarn.lock
-
-COPY redwood.toml redwood.toml
-COPY graphql.config.js graphql.config.js
-
-COPY packages packages
+COPY package.json .
 COPY api/package.json api/package.json
 COPY web/package.json web/package.json
-COPY lerna.json lerna.json
+COPY lerna.json .
+COPY yarn.lock .
+
+COPY packages packages
+COPY redwood.toml .
+COPY graphql.config.js .
+
 
 RUN yarn install --frozen-lockfile
 
@@ -31,7 +31,7 @@ RUN yarn build-packages && yarn rw build api
 
 # ==
 # Serve
-FROM node:14-alpine as serve
+FROM node:14 as serve
 
 WORKDIR /app
 
