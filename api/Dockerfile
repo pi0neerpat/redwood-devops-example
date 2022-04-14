@@ -5,7 +5,6 @@ FROM node:14 as base
 WORKDIR /app
 
 ARG ENVIRONMENT
-
 ENV ENVIRONMENT=$ENVIRONMENT
 
 COPY package.json package.json
@@ -36,23 +35,20 @@ FROM node:14 as serve
 
 WORKDIR /app
 
+COPY --from=build /app/api/package.json .
+RUN yarn install --production && \
+  yarn global add @redwoodjs/api-server @redwoodjs/internal
+
 COPY serve-api.sh serve-api.sh
 
-COPY --from=build /app/packages /app/packages
-
-COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=build /app/api/dist /app/api/dist
+COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=build /app/api/db /app/api/db
-COPY --from=build /app/package.json /app/package.json
-COPY --from=build /app/api/package.json /app/api/package.json
-COPY --from=build /app/yarn.lock /app/api/yarn.lock
-
+COPY --from=build /app/packages /app/packages
 COPY --from=build /app/redwood.toml /app/redwood.toml
-
-RUN yarn --cwd "api" --frozen-lockfile install --production
 
 # Expose RedwoodJS api port
 EXPOSE 8911
 
 # Entrypoint to @redwoodjs/api-server binary
-ENTRYPOINT ["./serve-api.sh"]
+ENTRYPOINT ["rw-server", "api"]
