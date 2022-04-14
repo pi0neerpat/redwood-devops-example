@@ -92,6 +92,14 @@ docker build . -t pi0neerpat/redwood-release-devops-example-web -f web/Dockerfil
 docker build . -t pi0neerpat/redwood-release-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
 ```
 
+## Notes on Docker
+
+Here is some of the rationale behind my docker setup
+
+- Migrations cannot be run during the build. They can only be run when the container started within the production environment
+- node-alpine is missing `python` and `node-gyp`, which are required for packages such as `node-canvas`
+- "At that point all you need is the api-server package". I don't think this is true, since I encountered missing deps for `@graphql/server`
+
 ## TODO
 
 - Update test to use Github service container for test database https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
