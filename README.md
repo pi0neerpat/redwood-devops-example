@@ -27,14 +27,18 @@ You can also manually trigger deployments using the workflow dispatch trigger.
 Follow these steps to add this to an existing project:
 
 1. Update your repo's secrets with `DISCORD_WEBHOOK_DEVOPS` from your Discord channel settings.
-2. `yarn add lerna -W -D && yarn lerna init`
-3. Copy `ci.yml` and `publish-ghcr.yml` to your repo, and update as needed.
 
-If you plan building Docker image, as in the example here, you'll need to copy over `/web/Dockerfile`, `/api/Dockerfile`, and `/web/config/nginx/default.conf`.
+2. Add lerna to your project.
 
-NOTE: If you have branch protection on, you will need to use a Github Personal Access Token in order for lerna to push commits. See [here](https://github.com/lerna/lerna/issues/1957#issuecomment-997377227).
+```bash
+yarn add lerna -W -D && yarn lerna init
+```
 
-<details><summary>See changes for protected branches</summary>
+3. Copy `ci.yml` and `publish-ghcr.yml` into your repo Github Actions. You'll need to make updates to these files, depending on your deployment strategy (see Docker below).
+
+<details><summary>NOTE: If you have branch protection on, you will need to use a Github Personal Access Token to enable lerna to push commits. Expand for more instructions.</summary>
+
+See [related comment](https://github.com/lerna/lerna/issues/1957#issuecomment-997377227).
 
 In `ci.yml` you'll need to use a PAT. Also a check is added to skip creating a release when lerna commits the new version.
 
@@ -62,6 +66,45 @@ create-release-draft:
 ```
 
 </details>
+
+## Docker
+
+If your deployment strategy is Docker, as in the example here, you'll need to copy over some additional files.
+
+```
+/web/Dockerfile
+/api/Dockerfile
+/web/config/nginx/default.conf
+.dockerignore
+```
+
+To build docker locally, use the following commands.
+
+```
+# web
+docker build . -t pi0neerpat/redwood-release-devops-example-web -f web/Dockerfile \
+--build-arg ENVIRONMENT=local \
+--build-arg VERSION=v0.0.1-dev \
+--build-arg REDWOOD_API_URL=http://0.0.0.0:8911 \
+--build-arg APP_DOMAIN=http://0.0.0.0:8910
+
+# api
+docker build . -t pi0neerpat/redwood-release-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
+```
+
+Explore an image using bash:
+
+```bash
+docker run --rm -it --entrypoint=/bin/bash <imageId>
+```
+
+## Notes on Docker
+
+Here is some of the rationale behind my docker setup
+
+- Migrations cannot be run during the build. They can only be run when the container started within the production environment
+- node-alpine is missing `python` and `node-gyp`, which are required for packages such as `node-canvas`
+- "At that point all you need is the api-server package". I don't think this is true, since I encountered missing deps for `@graphql/server`
 
 ## TODO
 

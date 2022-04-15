@@ -25,7 +25,7 @@ jobs:
     outputs:
       RELEASE_HTML_URL: ${{ steps.get_release.outputs.html_url }}
       BRANCH: ${{ steps.get_variables.outputs.VERSION }}
-      NODE_ENV: ${{ steps.get_variables.outputs.NODE_ENV }}
+      ENVIRONMENT: ${{ steps.get_variables.outputs.ENVIRONMENT }}
       VERSION: ${{ steps.get_version.outputs.VERSION }}
     steps:
       - name: Show context
@@ -45,18 +45,18 @@ jobs:
       - name: Get variables
         id: get_variables
         run: |
-          NODE_ENV=staging
+          ENVIRONMENT=staging
           BRANCH=${{ steps.get_release.outputs.tag_name }}
           if [ ${{ github.event.inputs.image_tag_prefix }} ] ; then
-             NODE_ENV=${{ github.event.inputs.image_tag_prefix }}
+             ENVIRONMENT=${{ github.event.inputs.image_tag_prefix }}
              BRANCH=${{ github.ref_name }}
           elif ! grep -q "staging" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
-             NODE_ENV=prod
+             ENVIRONMENT=prod
           fi
           echo BRANCH: $BRANCH
-          echo NODE_ENV: $NODE_ENV
+          echo ENVIRONMENT: $ENVIRONMENT
           echo "::set-output name=BRANCH::$BRANCH"
-          echo "::set-output name=NODE_ENV::$NODE_ENV"
+          echo "::set-output name=ENVIRONMENT::$ENVIRONMENT"
       - name: Checkout branch
         uses: actions/checkout@v2
         with:
@@ -104,7 +104,7 @@ jobs:
           context: .
           file: ./${{ matrix.platform }}/Dockerfile
           build-args: |
-            NODE_ENV=${{ needs.setup.outputs.NODE_ENV }}
+            ENVIRONMENT=${{ needs.setup.outputs.ENVIRONMENT }}
             REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
             APP_DOMAIN=${{ env.APP_DOMAIN }}
             VERSION=${{ needs.setup.outputs.VERSION }}
