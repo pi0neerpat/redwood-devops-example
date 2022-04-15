@@ -17,8 +17,9 @@ COPY packages packages
 COPY redwood.toml .
 COPY graphql.config.js .
 
-
+# React is needed for building the api package for some reason
 RUN yarn install --frozen-lockfile
+# RUN yarn add -W react react-dom
 
 # ==
 # Build
@@ -44,7 +45,10 @@ COPY --from=build /app/packages /app/packages
 # Only install necessary dependencies.
 # Uses Lerna for linking local packages, and Prisma for migrations
 RUN yarn global add @redwoodjs/api-server @redwoodjs/internal lerna && \
-      yarn install --production --frozen-lockfile
+      yarn install --production --frozen-lockfile && \
+      yarn cache clean && \
+# Helpful utilities for exploring your container
+      apt-get update && apt install -y nano ncdu
 
 COPY --from=build /app/api/dist /app/api/dist
 COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
@@ -52,10 +56,6 @@ COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY api/db /app/api/db
 COPY redwood.toml .
 COPY serve-api.sh .
-
-# Helpful utilities for exploring your container
-RUN ["apt-get", "update"]
-RUN ["apt", "install", "-y", "nano", "ncdu"]
 
 # Expose RedwoodJS api port
 EXPOSE 8911

@@ -92,6 +92,12 @@ docker build . -t pi0neerpat/redwood-release-devops-example-web -f web/Dockerfil
 docker build . -t pi0neerpat/redwood-release-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
 ```
 
+Explore an image using bash:
+
+```bash
+docker run --rm -it --entrypoint=/bin/bash <imageId>
+```
+
 ## Notes on Docker
 
 Here is some of the rationale behind my docker setup
