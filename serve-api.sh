@@ -1,3 +1,7 @@
 #!/bin/bash -ve
-yarn rw prisma migrate deploy
-yarn rw serve api
+
+# NOTE: Requires binaries. Install with:
+# yarn global add @redwoodjs/api-server @redwoodjs/internal prisma
+
+prisma migrate deploy --schema ./api/db/schema.prisma
+rw-server api
