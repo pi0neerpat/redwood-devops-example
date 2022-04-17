@@ -1,6 +1,6 @@
 <h1 align="center"><img width="600" style="border-radius: 12px 0px 0px 12px;" src="https://user-images.githubusercontent.com/35622595/161645096-1c45d1f2-c9ab-4314-86d6-7f31a8b6f771.png"/></h1>
 
-<p>
+<p align="center">
   <a href="#" target="_blank">
     <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
   </a>
@@ -170,8 +170,14 @@ Here is some of the rationale behind my docker setup
 👤 **Patrick Gallagher**
 
 - Website: https://patrickgallagher.dev
-  - Twitter: [@pi0neerpat](https://twitter.com/pi0neerpat)
-  - GitHub: [@pi0neerpat](https://github.com/pi0neerpat)
+- Twitter: [@pi0neerpat](https://twitter.com/pi0neerpat)
+- GitHub: [@pi0neerpat](https://github.com/pi0neerpat)
+
+👤 **Treasure Chess Community <maintainers@niftychess.com>**
+
+- Website: https://treasurechess.com
+- Twitter: [@treasurechess\_](https://twitter.com/treasurechess_)
+- GitHub: [@Treasure-Chess](https://github.com/Treasure-Chess)
 
 ## Show your support
 
