@@ -1,0 +1,144 @@
+name: 'Github Publish Docker'
+on:
+  release:
+    types: [published]
+  # Allow deployment manually
+  workflow_dispatch:
+    inputs:
+      image_tag_prefix:
+        description: 'Image Tag Prefix (prod or staging)'
+        required: true
+        default: 'staging'
+env:
+  REDWOOD_API_URL: 'http://0.0.0.0:8911'
+  APP_DOMAIN: 'http://0.0.0.0:8910'
+
+  # Container Registry
+  CONTAINER_REGISTRY_HOSTNAME: ghcr.io
+  CONTAINER_REGISTRY_USERNAME: ${{ github.actor }}
+  CONTAINER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-20.04
+    outputs:
+      RELEASE_HTML_URL: ${{ steps.get_release.outputs.html_url }}
+      BRANCH: ${{ steps.get_variables.outputs.VERSION }}
+      ENVIRONMENT: ${{ steps.get_variables.outputs.ENVIRONMENT }}
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - name: Show context
+        run: |
+          echo github.event_name: ${{ github.event_name }}
+          echo github.sha: ${{ github.sha }}
+          echo github.repository: ${{ github.repository }}
+          echo github.ref: ${{ github.ref }}
+          echo github.head_ref: ${{ github.head_ref }}
+          echo github.event.inputs.image_tag_prefix: ${{ github.event.inputs.image_tag_prefix }}
+      - name: Get release
+        id: get_release
+        continue-on-error: true
+        uses: bruceadams/get-release@v1.2.3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Get variables
+        id: get_variables
+        run: |
+          ENVIRONMENT=staging
+          BRANCH=${{ steps.get_release.outputs.tag_name }}
+          if [ ${{ github.event.inputs.image_tag_prefix }} ] ; then
+             ENVIRONMENT=${{ github.event.inputs.image_tag_prefix }}
+             BRANCH=${{ github.ref_name }}
+          elif ! grep -q "staging" <<< "${{ steps.get_release.outputs.tag_name }}" ; then
+             ENVIRONMENT=prod
+          fi
+          echo BRANCH: $BRANCH
+          echo ENVIRONMENT: $ENVIRONMENT
+          echo "::set-output name=BRANCH::$BRANCH"
+          echo "::set-output name=ENVIRONMENT::$ENVIRONMENT"
+      - name: Checkout branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.get_variables.outputs.BRANCH }}
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=v$(echo jq -r .version lerna.json)
+          if [ ${{ github.event.inputs.image_tag_prefix }} ] ;  then
+            VERSION=${{ steps.get_variables.outputs.BRANCH }}-$(echo $GITHUB_SHA | cut -c 1-7)
+          fi
+          echo "::set-output name=VERSION::$VERSION"
+      - name: Discord notify building
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
+        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
+        with:
+          args: 🏭 Building... `${{ steps.get_version.outputs.VERSION }}` for GHCR
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    needs: setup
+    timeout-minutes: 10
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [api, web]
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.setup.outputs.BRANCH }}
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Docker login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY_HOSTNAME }}
+          username: ${{ env.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ env.CONTAINER_REGISTRY_PASSWORD }}
+      - name: Setup Node.js v14
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Cache "node_modules"
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: node_modules_${{ hashFiles('**/yarn.lock') }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build packages
+        run: yarn build-packages
+        shell: bash
+      - name: Build api & web
+        run: yarn rw build
+        shell: bash
+      - name: Docker build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./${{ matrix.platform }}/Dockerfile
+          build-args: |
+            ENVIRONMENT=${{ needs.setup.outputs.ENVIRONMENT }}
+            REDWOOD_API_URL=${{ env.REDWOOD_API_URL }}
+            APP_DOMAIN=${{ env.APP_DOMAIN }}
+            VERSION=${{ needs.setup.outputs.VERSION }}
+          tags: |
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:latest
+            ${{ env.CONTAINER_REGISTRY_HOSTNAME }}/${{ github.repository }}-${{ matrix.platform }}:${{ needs.setup.outputs.VERSION }}
+  notify:
+    name: Notify
+    runs-on: ubuntu-20.04
+    needs:
+      - build
+      - setup
+    steps:
+      - name: Discord notify complete
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_DEVOPS }}
+        uses: Ilshidur/action-discord@0c4b27844ba47cb1c7bee539c8eead5284ce9fa9
+        with:
+          args: |
+            🚢 Shipped! `${{ needs.setup.outputs.VERSION }}` ${{ needs.setup.outputs.RELEASE_HTML_URL }}

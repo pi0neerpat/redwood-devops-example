@@ -137,14 +137,17 @@ To build docker locally, use the following commands.
 
 ```
 # web
-docker build . -t pi0neerpat/redwood-release-devops-example-web -f web/Dockerfile \
+docker build . -t pi0neerpat/redwood-devops-example-web -f web/Dockerfile \
 --build-arg ENVIRONMENT=local \
 --build-arg VERSION=v0.0.1-dev \
 --build-arg REDWOOD_API_URL=http://0.0.0.0:8911 \
 --build-arg APP_DOMAIN=http://0.0.0.0:8910
 
 # api
-docker build . -t pi0neerpat/redwood-release-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
+docker build . -t pi0neerpat/redwood-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
+
+# Base layer
+docker build . -t pi0neerpat/redwood-api-base
 ```
 
 Explore an image using bash:

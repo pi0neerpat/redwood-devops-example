@@ -1,0 +1,41 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+    # volumes:
+    # - ./peppermint/db:/data/db
+    environment:
+      POSTGRES_USER: username # The PostgreSQL user (useful to connect to the database)
+      POSTGRES_PASSWORD: password # The PostgreSQL password (useful to connect to the database)
+      POSTGRES_DB: default_database # The PostgreSQL default database (automatically created at first launch)
+  api:
+    image: pi0neerpat/redwood-devops-example-api:latest
+    ports:
+      - '8911:8911'
+    depends_on:
+      - postgres
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '200k'
+        max-file: '10'
+    env_file:
+      - .env
+    environment:
+      REDWOOD_API_URL: 'http://0.0.0.0:8911'
+      DATABASE_URL: 'postgres://username:password@postgres:5432/default_database?connection_limit=1'
+
+  # web:
+  #   image: pi0neerpat/redwood-devops-example-web:latest
+  #   # restart: always
+  #   ports:
+  #     - '8910:8910' # http
+  #   depends_on:
+  #     - api
+  #   logging:
+  #     driver: 'json-file'
+  #     options:
+  #       max-size: '200k'
+  #       max-file: '10'
+  # env_file:
+  #   - .env
