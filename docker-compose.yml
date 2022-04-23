@@ -9,9 +9,7 @@ services:
       POSTGRES_PASSWORD: password # The PostgreSQL password (useful to connect to the database)
       POSTGRES_DB: default_database # The PostgreSQL default database (automatically created at first launch)
   api:
-    image: pi0neerpat/redwood-release-devops-example-api:latest
-    # image: ghcr.io/pi0neerpat/treasure-chess-api:latest
-    # restart: always
+    image: pi0neerpat/redwood-devops-example-api:latest
     ports:
       - '8911:8911'
     depends_on:
@@ -28,8 +26,7 @@ services:
       DATABASE_URL: 'postgres://username:password@postgres:5432/default_database?connection_limit=1'
 
   # web:
-  #   image: pi0neerpat/redwood-release-devops-example-web:latest
-  #   # image: ghcr.io/pi0neerpat/treasure-chess-web:latest
+  #   image: pi0neerpat/redwood-devops-example-web:latest
   #   # restart: always
   #   ports:
   #     - '8910:8910' # http
