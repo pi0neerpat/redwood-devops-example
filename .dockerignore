@@ -8,6 +8,7 @@ dev.db*
 dist
 dist-babel
 node_modules/
+!node_modules/.prisma
 yarn-error.log
 web/public/mockServiceWorker.js
 web/public/storybook

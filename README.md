@@ -145,6 +145,9 @@ docker build . -t pi0neerpat/redwood-release-devops-example-web -f web/Dockerfil
 
 # api
 docker build . -t pi0neerpat/redwood-release-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
+
+# Base layer
+docker build . -t pi0neerpat/redwood-api-base
 ```
 
 Explore an image using bash:
