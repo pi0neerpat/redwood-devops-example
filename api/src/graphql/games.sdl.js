@@ -10,8 +10,8 @@ export const schema = gql`
     moves: String!
     moveCount: Int!
     ruleVariant: String!
-    externalUrl: String
     opening: String!
+    externalUrl: String!
     cardColor: String!
     achievements: [String!]
   }

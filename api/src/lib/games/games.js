@@ -6,7 +6,7 @@ import { logger } from 'src/lib/logger'
 
 import { parseGameFromChessDotCom } from 'src/lib/games/parsing'
 
-const GAMES_PER_PAGE = 50
+const GAMES_PER_PAGE = 5
 
 const fetchChessGames = async ({ username, year, month }) => {
   let monthString = month.toString()
