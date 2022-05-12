@@ -162,6 +162,7 @@ docker run -it --rm \
       -e REDWOOD_API_URL=http://0.0.0.0:8911 \
       --env-file .env \
       pi0neerpat/redwood-devops-example-api:latest
+# For database connection issues see https://stackoverflow.com/questions/31249112/allow-docker-container-to-connect-to-a-local-host-postgres-database
 
 docker run -it --rm \
        -p 8910:8910 \
