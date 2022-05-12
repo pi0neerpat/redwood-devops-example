@@ -40,17 +40,28 @@ build-app:
     COPY web web
     RUN yarn rw build web
     SAVE ARTIFACT web/dist web/dist AS LOCAL ./web/dist
+    SAVE ARTIFACT api/dist api/dist AS LOCAL ./api/dist
 
 docker-web:
     FROM nginx
-    BUILD +build-app # Ensure /dist always updated locally for 'rw serve' purposes
+    BUILD +build-app # Ensure /dist always saved locally for 'rw serve' purposes
     ARG ENVIRONMENT='staging'
     ARG VERSION='latest'
-    COPY web/config/nginx/default.conf /etc/nginx/conf.d/default.conf
+    COPY +build-app/web/config/nginx/default.conf /etc/nginx/conf.d/default.conf
     COPY +build-app/web/dist /usr/share/nginx/html
     RUN ls -lA /usr/share/nginx/html
     EXPOSE 8910
-    SAVE IMAGE redwood-devops-example-web:$VERSION
+    SAVE IMAGE pi0neerpat/redwood-devops-example-web:$VERSION
+
+docker-api:
+    FROM node:16
+    BUILD +build-app
+    ARG VERSION='latest'
+    COPY +build-app/api/dist /api/dist
+    COPY serve-api.sh .
+    EXPOSE 8911
+    ENTRYPOINT ["./serve-api.sh"]
+    SAVE IMAGE pi0neerpat/redwood-devops-example-api:$VERSION
 
 # Run web & api side by side
 test-images:
