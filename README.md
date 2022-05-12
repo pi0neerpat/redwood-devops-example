@@ -137,20 +137,36 @@ To build docker locally, use the following commands.
 
 ```
 # web
-docker build . -t pi0neerpat/redwood-release-devops-example-web -f web/Dockerfile \
+docker build . -t pi0neerpat/redwood-devops-example-web -f web/Dockerfile \
 --build-arg ENVIRONMENT=local \
 --build-arg VERSION=v0.0.1-dev \
 --build-arg REDWOOD_API_URL=http://0.0.0.0:8911 \
 --build-arg APP_DOMAIN=http://0.0.0.0:8910
 
 # api
-docker build . -t pi0neerpat/redwood-release-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
+docker build . -t pi0neerpat/redwood-devops-example-api -f api/Dockerfile --build-arg ENVIRONMENT=local
 ```
 
 Explore an image using bash:
 
 ```bash
 docker run --rm -it --entrypoint=/bin/bash <imageId>
+```
+
+Run an image:
+
+```bash
+docker run -it --rm \
+      -p 8911:8911 \
+      --network=host \
+      -e REDWOOD_API_URL=http://0.0.0.0:8911 \
+      --env-file .env \
+      pi0neerpat/redwood-devops-example-api:latest
+# For database connection issues see https://stackoverflow.com/questions/31249112/allow-docker-container-to-connect-to-a-local-host-postgres-database
+
+docker run -it --rm \
+       -p 8910:8910 \
+        pi0neerpat/redwood-devops-example-web:latest
 ```
 
 ## Notes on Docker
@@ -160,6 +176,32 @@ Here is some of the rationale behind my docker setup
 - Migrations cannot be run during the build. They can only be run when the container started within the production environment
 - node-alpine is missing `python` and `node-gyp`, which are required for packages such as `node-canvas`
 - "At that point all you need is the api-server package". I don't think this is true, since I encountered missing deps for `@graphql/server`
+
+### Earthly
+
+Key benefits for https://earthly.dev/get-earthly with Redwood:
+
+- Instant(!!) Docker builds, once tests pass (previously 15+ min)
+- Testing & building done in parallel
+- Run docker images side-by-side before publishing
+- Run migrations
+
+Gotchas when using Earthly:
+
+- Any command with `output`, or uses `--push` will only produce output if called directly, `earthly --push +target-with-push` or via a `BUILD` command
+
+Test with:
+
+```bash
+# Just build an image
+earthly +docker-web
+# Test the images
+earthly -P +test-images
+# Perform production migration
+earthly +migrate
+# Everything
+earthly +all
+```
 
 ## TODO
 
