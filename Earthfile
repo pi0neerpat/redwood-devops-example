@@ -13,7 +13,6 @@ deps:
     COPY redwood.toml .
     COPY graphql.config.js .
     COPY .nvmrc .
-
     RUN yarn
     # Output these back in case yarn install changes them.
     SAVE ARTIFACT package.json AS LOCAL ./package.json
@@ -41,35 +40,42 @@ build-app:
     RUN yarn rw build web
     SAVE ARTIFACT web/dist web/dist AS LOCAL ./web/dist
     SAVE ARTIFACT api/dist api/dist AS LOCAL ./api/dist
+    SAVE ARTIFACT api/db api/db
 
 docker-web:
     FROM nginx
-    BUILD +build-app # Ensure /dist always saved locally for 'rw serve' purposes
+    BUILD +build-app # Ensures /dist always saved locally for 'rw serve' purposes
     ARG ENVIRONMENT='staging'
     ARG VERSION='latest'
-    COPY +build-app/web/config/nginx/default.conf /etc/nginx/conf.d/default.conf
+    COPY web/config/nginx/default.conf /etc/nginx/conf.d/default.conf
     COPY +build-app/web/dist /usr/share/nginx/html
     RUN ls -lA /usr/share/nginx/html
     EXPOSE 8910
-    SAVE IMAGE pi0neerpat/redwood-devops-example-web:$VERSION
+    SAVE IMAGE --push pi0neerpat/redwood-devops-example-web:$VERSION
 
 docker-api:
-    FROM node:16
+    FROM +deps
     BUILD +build-app
     ARG VERSION='latest'
+    ENV ENVIRONMENT='local'
     COPY +build-app/api/dist /api/dist
+    COPY +build-app/api/db /api/db
     COPY serve-api.sh .
+    COPY redwood.toml .
+    COPY graphql.config.js .
+    RUN yarn global add @redwoodjs/api-server @redwoodjs/internal prisma && \
+      apt-get update && apt install -y nano ncdu
     EXPOSE 8911
     ENTRYPOINT ["./serve-api.sh"]
-    SAVE IMAGE pi0neerpat/redwood-devops-example-api:$VERSION
+    SAVE IMAGE --push pi0neerpat/redwood-devops-example-api:$VERSION
 
-# Run web & api side by side
 test-images:
     FROM earthly/dind:alpine
     RUN apk add curl
     WITH DOCKER \
-        --load redwood-devops-example-web:latest=+docker-web
-        RUN docker run -d -p 8910:8910 redwood-devops-example-web && \
+        --load pi0neerpat/redwood-devops-example-web:latest=+docker-web \
+        --load pi0neerpat/redwood-devops-example-api:latest=+docker-api
+        RUN docker run -d -p 8910:8910 pi0neerpat/redwood-devops-example-web && \
             sleep 5 && \
             curl 0.0.0.0:8910 | grep 'Treasure Chess'
     END
