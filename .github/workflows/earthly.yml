@@ -4,9 +4,9 @@ name: Earthly
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging, dev]
   pull_request:
-    branches: [main]
+    types: [opened, synchronize]
 
 jobs:
   earthly:
