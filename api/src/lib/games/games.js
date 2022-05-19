@@ -1,7 +1,6 @@
 import achievementsCalculator from '@treasure-chess/chess-achievements'
 import fetch from 'node-fetch'
 
-import { db } from 'src/lib/db'
 import { logger } from 'src/lib/logger'
 
 import { parseGameFromChessDotCom } from 'src/lib/games/parsing'
@@ -26,11 +25,7 @@ export const getTreasureCardColor = ({ game, username }) =>
     ? 'white'
     : 'black'
 
-const getFullGameDetails = async ({
-  game: rawGame,
-  username,
-  includeAchievements,
-}) => {
+const getFullGameDetails = async ({ game: rawGame, username }) => {
   try {
     let game = parseGameFromChessDotCom(rawGame)
     const cardColor = getTreasureCardColor({ game, username })
