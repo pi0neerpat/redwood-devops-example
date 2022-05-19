@@ -32,7 +32,7 @@ export const Success = ({ gamesWithFilter, username }) => {
   const { games, count } = gamesWithFilter
   return (
     <div>
-      {username}'s games for this month: {count}
+      {username} games for this month: {count}
       <br />
       {games.map((game) => (
         <>
