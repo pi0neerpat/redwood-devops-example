@@ -1,1 +1,3 @@
-module.exports = { bodyLimit: 2048576 }
+module.exports = { 
+  //bodyLimit: 2048576 
+  }
