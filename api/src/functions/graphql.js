@@ -8,7 +8,15 @@ import { db } from 'src/lib/db'
 import { logger } from 'src/lib/logger'
 
 export const handler = createGraphQLHandler({
-  loggerConfig: { logger, options: {} },
+  loggerConfig: {
+    logger,
+    options: {
+      tracing: false,
+      operationName: true,
+      query: false,
+      data: false,
+    },
+  },
   directives,
   sdls,
   services,

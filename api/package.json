@@ -5,6 +5,7 @@
   "dependencies": {
     "@redwoodjs/api": "^1.0.0",
     "@redwoodjs/graphql-server": "^1.0.0",
+    "@treasure-chess/chess-achievements": "^0.1.5",
     "example-package": "0.1.6-staging.5"
   }
 }

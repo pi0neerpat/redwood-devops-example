@@ -14,11 +14,15 @@
 
 ### Much of the code & tooling for Treasure Chess has been generalized for any RedwoodJS project, and made into open sauce so everyone can build a **production** Redwood app. We hope you find these resources useful. Happy hacking!
 
-Note that not everything here will be relevant if you are just starting a redwood project, however You'll need it as you grow. P.S. We're hiring: https://github.com/treasure-chess/jobs
+Not everything here will be relevant if you are just starting a redwood project, however You'll need it as you grow. P.S. We're hiring: https://github.com/treasure-chess/jobs
+
+The demo here loads the most recent games for a particular chess member.
+
+<p align="center"><img alt="Twitter: pi0neerpat" src="/assets/screenshot.png" /></p>
 
 ### Our Redwood Stack
 
-🧑‍💻 Get a quick overview from our Redwood v1 launch presentation demo [source](https://github.com/pi0neerpat/treasurechess-redwood-presentation).
+🧑‍💻 Click to watch a presentation for the Redwood v1 launch. ([view source](https://github.com/pi0neerpat/treasurechess-redwood-presentation))
 
 [![Redwood v1 launch presentation demo](https://img.youtube.com/vi/B0CP0aAePsI/0.jpg)](http://www.youtube.com/watch?v=B0CP0aAePsI)
 
