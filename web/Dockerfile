@@ -2,18 +2,18 @@
 # Builder: node
 ###########################################################################################
 
-FROM node:14 as builder
+FROM node:16 as builder
 
 # Node
-ARG NODE_ENV
+ARG ENVIRONMENT
+ARG VERSION
 ARG REDWOOD_API_URL
 ARG APP_DOMAIN
-ARG VERSION
 
-ENV NODE_ENV=$NODE_ENV
+ENV ENVIRONMENT=$ENVIRONMENT
+ENV VERSION=$VERSION
 ENV REDWOOD_API_URL=$REDWOOD_API_URL
 ENV APP_DOMAIN=$APP_DOMAIN
-ENV VERSION=$VERSION
 
 # Set workdir
 WORKDIR /app
