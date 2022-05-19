@@ -5,8 +5,8 @@ name: Earthly
 on:
   push:
     branches: [main, staging, dev]
-  pull_request:
-    types: [opened, synchronize]
+  # pull_request:
+  #   types: [opened, synchronize]
 
 jobs:
   earthly:
@@ -33,4 +33,4 @@ jobs:
       - name: Earthly version
         run: earthly --version
       - name: Run build
-        run: earthly --ci +docker-api
+        run: earthly --ci -P --push +docker
