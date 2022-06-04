@@ -7,13 +7,17 @@
 // 'src/pages/HomePage/HomePage.js'         -> HomePage
 // 'src/pages/Admin/BooksPage/BooksPage.js' -> AdminBooksPage
 
-import { Router, Route } from '@redwoodjs/router'
+import { Router, Route, Private } from '@redwoodjs/router'
+import Loader from 'src/components/Loader'
 
 const Routes = () => {
   return (
     <Router>
       <Route path="/" page={HomePage} name="home" />
       <Route prerender notfound page={NotFoundPage} />
+      <Private unauthenticated="home" whileLoadingAuth={Loader}>
+        <Route path="/profile" page={ProfilePage} name="profile" />
+      </Private>
     </Router>
   )
 }
