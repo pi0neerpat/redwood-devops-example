@@ -15,7 +15,7 @@ const Routes = () => {
     <Router>
       <Route path="/" page={HomePage} name="home" />
       <Route prerender notfound page={NotFoundPage} />
-      <Private unauthenticated="home" whileLoadingAuth={Loader}>
+      <Private unauthenticated="home" whileLoadingAuth={() => <Loader />}>
         <Route path="/profile" page={ProfilePage} name="profile" />
       </Private>
     </Router>

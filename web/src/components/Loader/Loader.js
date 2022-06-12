@@ -10,7 +10,7 @@ const Loader = () => {
     onRest: () => set(!flip),
     from: { x: 0 },
     x: 1,
-    config: { duration: 1 },
+    config: { duration: 1500 },
   })
 
   React.useEffect(() => {
